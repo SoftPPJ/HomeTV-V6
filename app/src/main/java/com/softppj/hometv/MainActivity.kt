@@ -2026,6 +2026,12 @@ class MainActivity: Activity() {
             migrated=true
         }
         val result=mutableListOf(Playlist("HomeTV Live",licensedPlaylist)).apply{addAll(configured)}
+        if(masterFeed.isNotEmpty()) {
+            val selected=prefs.getString("selected_playlist_source",null)
+            if(selected==null || selected.equals("TV",true) || selected.equals("Master",true)) {
+                prefs.edit().putString("selected_playlist_source","Master").apply()
+            }
+        }
         if(migrated)savePlaylists(result)
         return result
     }
