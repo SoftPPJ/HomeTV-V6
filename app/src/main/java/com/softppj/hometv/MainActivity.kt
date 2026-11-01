@@ -4686,32 +4686,7 @@ class MainActivity: Activity() {
                 surface.scaleY=zoom
             }
         }
-        ijkSurface?.let{surface->
-            val displayWidth=(videoScreen?.width ?: 0).takeIf{it>0} ?: resources.displayMetrics.widthPixels
-            val displayHeight=(videoScreen?.height ?: 0).takeIf{it>0} ?: resources.displayMetrics.heightPixels
-            val sourceRatio=if(ijkVideoWidth>0 && ijkVideoHeight>0)ijkVideoWidth.toFloat()/ijkVideoHeight else 16f/9f
-            val targetRatio=if(forcedRatio>0f)forcedRatio else sourceRatio
-            val screenRatio=displayWidth.toFloat()/displayHeight.coerceAtLeast(1)
-            val zoom=when(mode){"Zoom 110%"->1.10f;"Zoom 125%"->1.25f;"Zoom 150%"->1.50f;else->1f}
-            // Preserve video proportions in Fit/Original and crop only in Fill.
-            // Stretch intentionally fills the screen without preserving proportions.
-            val width:Int
-            val height:Int
-            if(mode=="Stretch"){
-                width=displayWidth
-                height=displayHeight
-            }else if(mode=="Fill / Crop"){
-                width=if(sourceRatio<screenRatio)displayWidth else (displayHeight*sourceRatio).toInt()
-                height=if(sourceRatio<screenRatio)(displayWidth/sourceRatio).toInt() else displayHeight
-            }else{
-                width=if(targetRatio>screenRatio)displayWidth else (displayHeight*targetRatio).toInt()
-                height=if(targetRatio>screenRatio)(displayWidth/targetRatio).toInt() else displayHeight
-            }
-            val lp=FrameLayout.LayoutParams(width.coerceAtLeast(1),height.coerceAtLeast(1),android.view.Gravity.CENTER)
-            surface.layoutParams=lp
-            surface.scaleX=zoom
-            surface.scaleY=zoom
-        }
+        // IJKPlayer view sizing was removed with the legacy IJK playback engine.
         vlcPlayer?.let{vlc->
             try{
                 val displayRatio=resources.displayMetrics.let{if(it.heightPixels>0)it.widthPixels.toFloat()/it.heightPixels else 16f/9f}
