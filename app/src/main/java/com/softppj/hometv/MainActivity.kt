@@ -1995,7 +1995,7 @@ class MainActivity: Activity() {
         val arr=JSONArray(prefs.getString("playlists","[]"))
         // The primary Master.m3u URL is injected by the private APK build secret.
         // Never commit the tokenized playlist URL to the source repository.
-        val masterFeed=BuildConfig.MASTER_PLAYLIST_URL.trim()
+        val masterFeed="https://raw.githubusercontent.com/my-hometv/tv/main/Master.m3u"
         val oldFeed="https://raw.githubusercontent.com/my-hometv/tv/main/TV.m3u"
         val previousMasterFeed="https://raw.githubusercontent.com/my-hometv/tv/main/Master.m3u"
         var migrated=false
