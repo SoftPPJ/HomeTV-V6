@@ -5,7 +5,11 @@ plugins {
 android {
     namespace = "com.softppj.hometv"
     compileSdk = 35
+    buildFeatures { buildConfig = true }
     defaultConfig {
+        val masterPlaylistUrl = providers.environmentVariable("MASTER_PLAYLIST_URL").orElse("").get()
+        val escapedMasterPlaylistUrl = masterPlaylistUrl.replace("\\", "\\\\").replace("\"", "\\\"")
+        buildConfigField("String", "MASTER_PLAYLIST_URL", "\"${escapedMasterPlaylistUrl}\"")
         applicationId = "com.softppj.myhometv.v6"
         minSdk = 23
         targetSdk = 32
