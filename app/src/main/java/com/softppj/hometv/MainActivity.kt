@@ -4099,7 +4099,8 @@ class MainActivity: Activity() {
         val options=listOf("⚙  Settings","⌂  Home","★  Favorites","🙈  Hidden channels","✓  Check hidden channels","▤  EPG / TV Guide","↻  Refresh from source","☰  All channels","▦  Playlists")+
             groups.map{"▸  "+it}
         val list=ListView(this)
-        list.adapter=android.widget.ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,options)
+        val numberedOptions=options.mapIndexed{index,item->"${index+1}.  "+item}
+        list.adapter=android.widget.ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,numberedOptions)
         drawer.addView(list,LinearLayout.LayoutParams(-1,0,1f))
         val width=(resources.displayMetrics.widthPixels*0.43f).toInt().coerceAtLeast(260)
         screen.addView(drawer,FrameLayout.LayoutParams(width,-1,Gravity.START))
@@ -4159,7 +4160,8 @@ class MainActivity: Activity() {
             setPadding(20,18,12,16)
         })
         val list=ListView(this)
-        list.adapter=android.widget.ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,names)
+        val numberedNames=names.mapIndexed{index,item->"${index+1}.  "+item}
+        list.adapter=android.widget.ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,numberedNames)
         drawer.addView(list,LinearLayout.LayoutParams(-1,0,1f))
         screen.addView(drawer,FrameLayout.LayoutParams(
             (resources.displayMetrics.widthPixels*0.43f).toInt().coerceAtLeast(260),-1,Gravity.START))
@@ -5936,10 +5938,29 @@ class MainActivity: Activity() {
             return true
         }
         if(active>=0 && event.action==KeyEvent.ACTION_DOWN){
+            // Numeric keys select a numbered row while a drawer is open.
+            // Outside menus, they retain their normal channel-number function.
+            val drawer=videoScreen?.findViewWithTag<View>("channel_drawer")
+                ?:videoScreen?.findViewWithTag<View>("settings_drawer")
+                ?:videoScreen?.findViewWithTag<View>("left_navigation")
+            val drawerOpen=drawer!=null
             val digit=when(event.keyCode){
                 in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9->event.keyCode-KeyEvent.KEYCODE_0
                 in KeyEvent.KEYCODE_NUMPAD_0..KeyEvent.KEYCODE_NUMPAD_9->event.keyCode-KeyEvent.KEYCODE_NUMPAD_0
                 else->-1
+            }
+            if(digit>=0 && drawerOpen){
+                val menuList=(drawer as? android.view.ViewGroup)?.let{group->
+                    (0 until group.childCount).mapNotNull{group.getChildAt(it) as? ListView}.firstOrNull()
+                }
+                val position=if(digit==0)9 else digit-1
+                if(menuList!=null && position in 0 until (menuList.adapter?.count ?: 0)){
+                    menuList.setSelection(position)
+                    menuList.setItemChecked(position,true)
+                }else{
+                    Toast.makeText(this,"Menu option "+(position+1)+" is not available",Toast.LENGTH_SHORT).show()
+                }
+                return true
             }
             if(digit>=0){enterChannelDigit(digit);return true}
             if(channelDigits.isNotEmpty() && (event.keyCode==KeyEvent.KEYCODE_DPAD_CENTER || event.keyCode==KeyEvent.KEYCODE_ENTER || event.keyCode==KeyEvent.KEYCODE_NUMPAD_ENTER)){
@@ -5947,7 +5968,6 @@ class MainActivity: Activity() {
             }
             // Dispatch before PlayerView/SurfaceView can consume remote DPAD events.
             // Let an open channel drawer handle its own list navigation.
-            val drawerOpen=videoScreen?.findViewWithTag<View>("channel_drawer")!=null || videoScreen?.findViewWithTag<View>("settings_drawer")!=null || videoScreen?.findViewWithTag<View>("left_navigation")!=null
             if(!drawerOpen){
                 val media=channels.getOrNull(active)?.mediaType
                 if(media in setOf("movie","series","music")){
