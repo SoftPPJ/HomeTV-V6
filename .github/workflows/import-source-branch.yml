@@ -1,0 +1,23 @@
+name: Import HomeTV V6 development branch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Import selected source branch with full history
+        env:
+          SOURCE_TOKEN: ${{ secrets.HOMETV_SOURCE_TOKEN }}
+          DESTINATION_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DESTINATION_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          git clone --no-tags --single-branch --branch my-home-tv-v6-development "https://x-access-token:${SOURCE_TOKEN}@github.com/SoftPPJ/HomeTV.git" source
+          cd source
+          git remote set-url origin "https://x-access-token:${DESTINATION_TOKEN}@github.com/${DESTINATION_REPOSITORY}.git"
+          git push origin HEAD:refs/heads/my-home-tv-v6-development
