@@ -1,30 +1,58 @@
-# HomeTV
+# My Home TV V6
 
-Native Android TV + Android phone IPTV player (early development build).
+The V6 Android TV IPTV player source repository. This project is maintained separately from the new HomeTV Next V1 application.
 
-## Implemented in source
-- Add, edit, enable/disable, and delete multiple remote HTTP(S) M3U playlists.
-- Combine enabled playlists into grouped channel navigation.
-- Play compatible IPTV streams with Android Media3 ExoPlayer.
-- Embed YouTube Live videos in a WebView when YouTube allows embedding.
-- Lock channels and groups with a 4–6 digit PIN (SHA-256 digest stored locally; no secure hardware-backed credential storage).
-- Remember last channel and optionally resume when app launches.
-- Android TV remote left/right and channel up/down shortcuts while watching.
-- Settings available on TV and phone.
-- Optional boot receiver: Android 10+ prevents ordinary apps from freely launching an Activity in the background. TV power-button interception is not supported.
+## Repository and branch
 
-## Build an APK
-Open **Actions → Build HomeTV APK → Run workflow**, or push an Android source change to main.
-If the build succeeds, download the **HomeTV-debug** artifact from the workflow run.
-Debug APK is intended for testing, not Play Store release.
+- Repository: [SoftPPJ/HomeTV-V6](https://github.com/SoftPPJ/HomeTV-V6)
+- Active development branch: `my-home-tv-v6-development`
+- Default branch: `main` (kept separate from the development branch for now)
+- Android application ID: `com.softppj.myhometv.v6`
+- Version name configured in the development source: `6.0.0-dev`
+- Debug APK filename configured by the project: `HomeTV-V6.apk`
 
-## Known limitations
-- Android TV startup is device/OS dependent; on Android 10+ the boot receiver intentionally does not launch the app.
-- YouTube embedding may fail on broadcasts that disallow it.
-- Remote navigation, UI scaling, HLS behavior, and build success require testing on actual devices.
-- The M3U parser handles basic EXTINF entries; extended tags, fallback streams, and EPG support are not yet complete.
-- PIN lock is a convenience restriction, not a hardened parental-control security boundary. Additional protection is required before relying on it.
-- Playlist errors are currently summarized; detailed diagnostics remain to be added.
-- No signed release APK has been verified.
+## Current playback architecture
 
-The IPTV playlist repository is not modified by this app.
+The inspected Gradle configuration includes:
+
+- AndroidX Media3 1.5.1 playback components, including HLS, DASH, RTSP and SmoothStreaming modules.
+- LibVLC 3.5.1 for supported fallback/protocol handling.
+- Jellyfin Media3 FFmpeg decoder extension for supported software audio decoding.
+
+The FFmpeg decoder is a Media3 decoder extension, not a separate third playback engine. IJKPlayer is not currently included in the inspected V6 Gradle dependencies. Do not describe it as an active engine or add it without a separate compatibility, licensing and device-test review.
+
+## Development scope
+
+The V6 implementation and stabilization checklists cover:
+
+- Cinematic Android TV home experience and remote navigation.
+- IPTV playback, engine routing, reconnect behaviour and preservation of confirmed URL/engine choices.
+- Playlist caching, large-list performance, numbering and playlist lifecycle.
+- EPG, reminders, viewer profiles, favourites and playback history.
+- Picture/audio/subtitle settings and per-channel preferences.
+- YouTube and WebView playback behaviour.
+- Diagnostics, backup/restore and licence handling.
+
+Checklist entries are not considered complete merely because related source code exists. Refer to the project checklists for the exact pending verification gates.
+
+## Build ownership
+
+This repository is for V6 source development and checks. Its current `.github/workflows/android.yml` workflow is source-only and does not build or publish an APK.
+
+APK compilation and release work is handled separately in [ppj1981/HomeTV-Build](https://github.com/ppj1981/HomeTV-Build). Do not create a release or prerelease from this repository unless the project owner explicitly approves a change to that policy.
+
+## Current verification status
+
+- The `my-home-tv-v6-development` branch was imported from `SoftPPJ/HomeTV` with its commit history preserved.
+- The implementation and stabilization documents explicitly identify outstanding compile, regression, licensing and Android TV device-test gates.
+- Large-playlist stability, playback protocol coverage, remote behaviour, licence activation/offline behaviour and long-playback reliability require verification on the target TV.
+- Never mark a device test passed without observed results.
+
+## Release and backup policy
+
+Do not publish a production APK, prerelease or release without explicit approval. Keep the original private `SoftPPJ/HomeTV` repository unchanged as a backup until the new repositories have been fully reviewed.
+
+## Related project
+
+- [HomeTV Next V1](https://github.com/SoftPPJ/HomeTV-Next)
+- [HomeTV APK build repository](https://github.com/ppj1981/HomeTV-Build)
